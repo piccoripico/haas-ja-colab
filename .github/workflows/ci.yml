@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  static:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Build localized notebooks
+        run: python scripts/build_notebooks.py
+      - name: Build localized READMEs
+        run: python scripts/build_readmes.py
+      - name: Build localization coverage table
+        run: python scripts/build_languages.py
+      - name: Run contract tests
+        run: python -m unittest discover -s tests -v
+      - name: Check repository
+        run: python scripts/check_repository.py
+      - name: Ensure generated artifacts are committed
+        run: git diff --exit-code -- notebooks docs/README docs/LANGUAGES.md
